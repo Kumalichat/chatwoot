@@ -86,14 +86,16 @@ RUN if [ "$RAILS_ENV" = "production" ]; then \
   && rm -rf spec node_modules tmp/cache; \
   fi
 
-# Generate .git_sha file with current commit hash
-RUN git rev-parse HEAD > /app/.git_sha
+# Generate .git_sha file with current commit hash. Coolify builds without .git,
+# so fall back to its SOURCE_COMMIT build arg (or "unknown").
+ARG SOURCE_COMMIT
+RUN git rev-parse HEAD > /app/.git_sha 2>/dev/null || echo "${SOURCE_COMMIT:-unknown}" > /app/.git_sha
 
 # Remove unnecessary files
 RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
   && find /gems/ruby/3.4.0/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
   && rm -rf .git \
-  && rm .gitignore
+  && rm -f .gitignore
 
 # final build stage
 FROM ruby:3.4.4-alpine3.21
