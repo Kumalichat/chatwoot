@@ -1,11 +1,10 @@
-# Coolify deployment (Docker Compose build pack). Builds the image from this repo
-# so the Kumalichat branding ships; enterprise/ is excluded via .dockerignore.
+# Coolify deployment (Docker Compose build pack). Pulls the prebuilt Kumalichat
+# image set in KUMALICHAT_IMAGE (e.g. youruser/kumalichat:latest); build and push
+# it with docker/build-and-push.sh. enterprise/ is excluded via .dockerignore.
 services:
   rails:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    image: kumalichat:latest
+    image: ${KUMALICHAT_IMAGE:?}
+    pull_policy: always
     depends_on:
       - postgres
       - redis
@@ -47,10 +46,8 @@ services:
       retries: 30
 
   sidekiq:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    image: kumalichat:latest
+    image: ${KUMALICHAT_IMAGE:?}
+    pull_policy: always
     depends_on:
       - postgres
       - redis
